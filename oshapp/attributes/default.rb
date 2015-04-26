@@ -1,1 +1,1 @@
-default[:phpapp][:dbtable] = 'urler'
+default[:oshapp][:dbtable] = 'urler'

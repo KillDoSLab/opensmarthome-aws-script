@@ -93,7 +93,7 @@
         "UseCustomCookbooks": "true",
         "CustomCookbooksSource": {
           "Type": "git",
-          "Url": "git://github.com/amazonwebservices/opsworks-example-cookbooks.git"
+          "Url": "git://github.com/KillDoSLab/opensmarthome-aws-script.git"
         },
         "VpcId":{ "Ref": "vpcID" }
       }
