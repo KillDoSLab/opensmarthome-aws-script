@@ -1,0 +1,224 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  
+  "Mappings" : {
+    "Region2Principal" : {
+      "us-east-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+      "us-west-2"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+      "us-west-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+      "eu-west-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+      "ap-southeast-1" : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+      "ap-northeast-1" : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+      "ap-southeast-2" : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+      "sa-east-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+      "cn-north-1"     : { "EC2Principal" : "ec2.amazonaws.com.cn", "OpsWorksPrincipal" : "opsworks.amazonaws.com.cn" },
+      "eu-central-1"   : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" }
+    }
+
+  },
+  
+  "Parameters": {
+	"vpcID": {
+      "Description": "Select VPC",
+      "Type": "AWS::EC2::VPC::Id"
+    },
+    "ServiceRole": {
+      "Default": "aws-opsworks-service-role",
+      "Description": "The OpsWorks service role",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "64",
+      "AllowedPattern": "[a-zA-Z][a-zA-Z0-9-]*",
+      "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+    },
+    "InstanceRole": {
+      "Default": "aws-opsworks-ec2-role",
+      "Description": "The OpsWorks instance role",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "64",
+      "AllowedPattern": "[a-zA-Z][a-zA-Z0-9-]*",
+      "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+    },
+    "AppName": {
+      "Default": "killdosApp",
+      "Description": "The app name",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "64",
+      "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+      "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+    },
+    "MysqlRootPassword" : {
+      "Default": "aws-opsworks-ec2-role",
+      "Description" : "MysqlRootPassword",
+      "NoEcho" : "true",
+      "Type" : "String"
+    }
+  },
+  "Resources": {
+    "awsOpsworksServiceRole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+            "Path": "/",
+            "AssumeRolePolicyDocument": {
+                "Version": "2008-10-17",
+                "Statement": [
+                	{
+				      "Sid": "",
+				      "Effect": "Allow",
+				      "Principal": {
+				        "Service": "opsworks.amazonaws.com"
+				      },
+				      "Action": "sts:AssumeRole"
+				    }
+                ]
+            }
+        }
+    },
+    
+
+    "myStack": {
+      "Type": "AWS::OpsWorks::Stack",
+      "Properties": {
+        "Name": {
+          "Ref": "AWS::StackName"
+        },
+       "ServiceRoleArn": {
+          "Fn::GetAtt": [ "OpsWorksServiceRole", "Arn"]            
+        },
+        "DefaultInstanceProfileArn": {
+          "Fn::GetAtt": [ "OpsWorksInstanceProfile", "Arn"]
+        },
+        "UseCustomCookbooks": "true",
+        "CustomCookbooksSource": {
+          "Type": "git",
+          "Url": "git://github.com/amazonwebservices/opsworks-example-cookbooks.git"
+        },
+        "VpcId":{ "Ref": "vpcID" }
+      }
+    },    
+    "phpLayer": {
+      "Type": "AWS::OpsWorks::Layer",
+      "DependsOn": "myApp",
+      "Properties": {
+        "StackId": {"Ref": "myStack"},
+        "Type": "php-app",
+	    "Shortname" : "php-app",
+        "EnableAutoHealing" : "true",
+        "AutoAssignElasticIps" : "false",
+        "AutoAssignPublicIps" : "true",
+        "Name": "PHP Layer",
+        "CustomRecipes" : {
+          "Deploy" : ["phpapp::appsetup"]
+        }
+      }
+    },
+    "DBLayer" : {
+      "Type" : "AWS::OpsWorks::Layer",
+      "DependsOn": "myApp",
+      "Properties" : {
+        "StackId" : {"Ref":"myStack"},
+        "Type" : "db-master",
+	    "Shortname" : "db-layer",
+        "EnableAutoHealing" : "true",
+        "AutoAssignElasticIps" : "false",
+        "AutoAssignPublicIps" : "true",
+        "Name" : "MySQL Layer",
+        "CustomRecipes" : {
+          "Deploy" : ["phpapp::dbsetup"]
+        },
+        "Attributes" : {
+          "MysqlRootPassword" : {"Ref":"MysqlRootPassword"},
+          "MysqlRootPasswordUbiquitous": "true"
+        },
+        "VolumeConfigurations":[{"MountPoint":"/vol/mysql","NumberOfDisks":1,"Size":10}]
+      }
+    }, 
+    "myAppInstance1": {
+      "Type": "AWS::OpsWorks::Instance",
+      "Properties": {
+      	"Os":"Amazon Linux 2015.03",
+        "StackId": {"Ref": "myStack"},
+        "LayerIds": [{"Ref": "phpLayer"}],
+        "InstanceType": "t2.micro",
+        "RootDeviceType": "ebs"
+      }
+    },
+    "myDBInstance": {
+      "Type": "AWS::OpsWorks::Instance",
+      "Properties": {
+      	"Os":"Amazon Linux 2015.03",
+        "StackId": {"Ref": "myStack"},
+        "LayerIds": [{"Ref": "DBLayer"}],
+        "InstanceType": "t2.micro",
+        "RootDeviceType": "ebs"
+      }
+    },
+    
+    "myApp" : {
+      "Type" : "AWS::OpsWorks::App",
+      "Properties" : {
+        "StackId" : {"Ref":"myStack"},
+        "Type" : "php",
+        "Name" : {"Ref": "AppName"},
+        "AppSource" : {
+          "Type" : "git",
+          "Url" : "git://github.com/amazonwebservices/opsworks-demo-php-simple-app.git",
+          "Revision" : "version2"
+        },
+        "Attributes" : {
+          "DocumentRoot" : "web"
+        }
+      }
+    },
+    "OpsWorksServiceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": { "Service": [{ "Fn::FindInMap" : ["Region2Principal", {"Ref" : "AWS::Region"}, "OpsWorksPrincipal"]}] },
+            "Action": [ "sts:AssumeRole" ]
+          }]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "opsworks-service",
+            "PolicyDocument": {
+              "Statement": [{
+                "Effect": "Allow",
+                "Action": [ "ec2:*", "iam:PassRole", "cloudwatch:GetMetricStatistics", "elasticloadbalancing:*" ],
+                "Resource": "*"
+              }]
+            }
+          }
+        ]
+      }
+    },
+
+    "OpsWorksInstanceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": { "Service": [{ "Fn::FindInMap" : ["Region2Principal", {"Ref" : "AWS::Region"}, "EC2Principal"]}] },
+            "Action": [ "sts:AssumeRole" ]
+          }]
+        },
+        "Path": "/"
+      }
+    },
+
+    "OpsWorksInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [ { "Ref": "OpsWorksInstanceRole" } ]
+      }
+    }
+   }
+  
+}
