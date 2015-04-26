@@ -1,6 +1,9 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "KilldosLab Open Smart Home Server CloudFormation Script. copy right by killdoslab",
+  "Description": "KilldosLab Open Smart Home Server CloudFormation Script. 
+   Author: killdoslab
+   2015/04/26
+   License : https://github.com/KillDoSLab/opensmarthome-aws-script/blob/master/LICENSE-LGPL-3.0.md",
   
   "Mappings" : {
     "Region2Principal" : {
