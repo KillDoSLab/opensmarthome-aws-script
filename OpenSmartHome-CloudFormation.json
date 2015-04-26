@@ -110,7 +110,7 @@
         "AutoAssignPublicIps" : "true",
         "Name": "PHP Layer",
         "CustomRecipes" : {
-          "Deploy" : ["phpapp::appsetup"]
+          "Deploy" : ["oshApp::appsetup"]
         }
       }
     },
@@ -126,7 +126,7 @@
         "AutoAssignPublicIps" : "true",
         "Name" : "MySQL Layer",
         "CustomRecipes" : {
-          "Deploy" : ["phpapp::dbsetup"]
+          "Deploy" : ["oshApp::dbsetup"]
         },
         "Attributes" : {
           "MysqlRootPassword" : {"Ref":"MysqlRootPassword"},
