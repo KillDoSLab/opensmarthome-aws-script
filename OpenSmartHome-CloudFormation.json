@@ -1,5 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "KilldosLab Open Smart Home Server CloudFormation Script. copy right by killdoslab",
   
   "Mappings" : {
     "Region2Principal" : {
