@@ -55,6 +55,10 @@
       "Description" : "MysqlRootPassword",
       "NoEcho" : "true",
       "Type" : "String"
+    },
+    "SSHKeyPaire" : {
+      "Description" : "EC2->NETWORK & SECURITY->Key Pairs",
+      "Type" : "AWS::EC2::KeyPair::KeyName"
     }
   },
   "Resources": {
@@ -143,7 +147,8 @@
         "StackId": {"Ref": "myStack"},
         "LayerIds": [{"Ref": "phpLayer"}],
         "InstanceType": "t2.micro",
-        "RootDeviceType": "ebs"
+        "RootDeviceType": "ebs",
+        "SshKeyName": { "Ref": "SSHKeyPaire" }
       }
     },
     "myDBInstance": {
@@ -153,7 +158,8 @@
         "StackId": {"Ref": "myStack"},
         "LayerIds": [{"Ref": "DBLayer"}],
         "InstanceType": "t2.micro",
-        "RootDeviceType": "ebs"
+        "RootDeviceType": "ebs",
+        "SshKeyName": { "Ref": "SSHKeyPaire" }
       }
     },
     
