@@ -6,11 +6,12 @@ node[:deploy].each do |app_name, deploy|
     	mode 0644
   end
   
-  script "install mongodb" do
-      interpreter "bash"
+  bash "install mongodb" do
       user "root"
-      cwd "#{deploy[:deploy_to]}/current"
-      code"yum -y install mongodb-org"
+      cwd "/tmp"
+      code <<-EOH
+      yum -y install mongodb-org
+      EOH
       
   end
 end
