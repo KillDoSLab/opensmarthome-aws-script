@@ -6,12 +6,7 @@ node[:deploy].each do |app_name, deploy|
     	mode 0644
   end
   
-  bash "install mongodb" do
-      user "root"
-      cwd "/tmp"
-      code <<-EOH
-      yum -y install mongodb-org
-      EOH
-      
+  yum_package 'mongodb-org' do 
   end
+  
 end
