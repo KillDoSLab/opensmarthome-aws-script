@@ -1,4 +1,5 @@
-package ['nodejs','npm'] do
+package "install node js" do
+    package_name ["nodejs", "npm"]
     action :install
 end
 
