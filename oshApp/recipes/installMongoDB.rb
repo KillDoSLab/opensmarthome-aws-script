@@ -32,3 +32,20 @@ script "service restart" do
     service mongod restart
     EOH
 end
+
+package 'php-pear' do
+    action :install
+end
+
+package 'php-devel' do
+    action :install
+end
+
+script "service restart" do
+    interpreter "bash"
+    user "root"
+    cwd "/tmp"
+    code <<-EOH
+    pecl install mongo
+    EOH
+end
