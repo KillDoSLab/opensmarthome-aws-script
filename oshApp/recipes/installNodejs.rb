@@ -15,6 +15,6 @@ script "update new version" do
     npm install -g n
     n stable
     npm update npm -g
+    npm install pm2 -g
     EOH
 end
-
