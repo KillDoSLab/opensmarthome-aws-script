@@ -7,6 +7,7 @@ node[:deploy].each do |app_name, deploy|
   end
   
   yum_package 'mongodb-org' do 
+    action :install
   end
   
 end
