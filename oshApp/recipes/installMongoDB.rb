@@ -41,7 +41,7 @@ package 'php-devel' do
     action :install
 end
 
-script "service restart" do
+script "install php-mongo" do
     interpreter "bash"
     user "root"
     cwd "/tmp"
