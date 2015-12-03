@@ -5,7 +5,8 @@ node[:deploy].each do |app_name, deploy|
     	group 'root'
     	mode 0644
   end
-  
-  package 'mongodb-org' do
-  end
+end
+
+package 'mongodb-org' do
+    action :install
 end
