@@ -25,3 +25,12 @@ cookbook_file "/etc/mongod.conf" do
   	owner 'root'
     group 'root'
 end
+
+script "service restart" do
+    interpreter "bash"
+    user "root"
+    cwd "/tmp"
+    code <<-EOH
+    service mongod restart
+    EOH
+end
