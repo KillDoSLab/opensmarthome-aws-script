@@ -10,3 +10,18 @@ end
 package 'mongodb-org' do
     action :install
 end
+
+script "set chkconfig" do
+    interpreter "bash"
+    user "root"
+    cwd "/tmp"
+    code <<-EOH
+    chkconfig mongod on
+    EOH
+end
+
+cookbook_file "/etc/mongod.conf" do
+  	source 'mongod.conf.erb'
+  	owner 'root'
+    group 'root'
+end
