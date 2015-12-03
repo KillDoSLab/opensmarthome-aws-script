@@ -1,4 +1,4 @@
-package ['nodejs', 'npm'] do
+package ['nodejs','npm'] do
     action :install
 end
 
