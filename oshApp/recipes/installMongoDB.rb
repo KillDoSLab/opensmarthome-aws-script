@@ -49,3 +49,18 @@ script "install php-mongo" do
     pecl install mongo
     EOH
 end
+
+cookbook_file "/etc/php.d/mongo.ini" do
+  	source 'mongo.ini.erb'
+  	owner 'root'
+    group 'root'
+end
+
+script "service restart" do
+    interpreter "bash"
+    user "root"
+    cwd "/tmp"
+    code <<-EOH
+    service httpd restart
+    EOH
+end
